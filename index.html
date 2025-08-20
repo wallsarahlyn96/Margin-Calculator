@@ -94,7 +94,7 @@
 
         <div class="stack">
           <button class="btn" id="run">Run Calculator</button>
-          <span class="pill">Base+ITC = (SGIP − Redline − Sales) + 30% of TEPC • Total Profit (PPA only) = Base (no ITC) + 6% of PPA</span>
+          <span class="pill">Base+ITC = (SGIP − Redline − Sales) + 30% of TEPC • Total Profit (PPA only) = Base (no ITC) + min 15% of PPA</span>
         </div>
       </div>
 
@@ -144,7 +144,7 @@
             <div class="sub" id="kBaseSub"></div>
           </div>
           <div class="kpi">
-            <div class="label">Total Profit (PPA only — 20% of 30% ITC)</div>
+            <div class="label">Total Profit (PPA only — min 15% of PPA)</div>
             <div class="value" id="kTotal">$0</div>
             <div class="sub" id="kTotalSub"></div>
           </div>
@@ -207,10 +207,11 @@
     const baseNoITC = sgipApproved - redlineTotal - salesComm;
     const basePlusITC = baseNoITC + itcVal;
 
-    // PPA kicker = 6% of PPA (20% of 30% ITC on PPA amount)
+    // PPA kicker = MIN 15% of PPA amount
     const ppaEnabled = $('ppaEnabled').value === 'yes';
     const ppaAmount = parseFloat($('ppaAmount').value)||0;
-    const ppaKicker = ppaEnabled ? 0.06 * ppaAmount : 0;
+    const ppaKickerRate = 0.15; // minimum 15%
+    const ppaKicker = ppaEnabled ? ppaKickerRate * ppaAmount : 0;
 
     // Total Profit (PPA only, no ITC added here)
     const totalProfit = baseNoITC + ppaKicker;
@@ -232,14 +233,14 @@
     $('kITCSub').textContent = `30% × TEPC (${money(tepcUsed)})`;
 
     $('kPPA').textContent = money(ppaKicker);
-    $('kPPASub').textContent = ppaEnabled ? '6% of PPA amount' : 'disabled';
+    $('kPPASub').textContent = ppaEnabled ? `${(ppaKickerRate*100).toFixed(0)}% of PPA amount (minimum)` : 'disabled';
 
     $('kBase').textContent = money(basePlusITC);
     $('kBaseSub').textContent = `= (SGIP ${money(sgipApproved)} − Redline ${money(redlineTotal)} − Sales ${money(salesComm)}) + ITC ${money(itcVal)}`;
 
     $('kTotal').textContent = money(totalProfit);
     $('kTotal').className = 'value ' + (totalProfit>=0?'ok':'bad');
-    $('kTotalSub').textContent = `Base (no ITC) ${money(baseNoITC)} + PPA ${money(ppaKicker)} (6% of PPA)`;
+    $('kTotalSub').textContent = `Base (no ITC) ${money(baseNoITC)} + PPA ${money(ppaKicker)} (min ${(ppaKickerRate*100).toFixed(0)}% of PPA)`;
   }
 
   // Recalc on click & when inputs change
