@@ -1,3 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SGIP Redline Profit Calculator (Installer)</title>
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#0f1d39; --ink:#e8eeff; --muted:#9fb2d9; --line:#1e2b4d;
+      --brand:#3b82f6; --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#050914,#0f1830);color:var(--ink);}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    h1{font-size:22px;margin:0 0 12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .section-title{font-size:12px;letter-spacing:1.3px;color:var(--muted);text-transform:uppercase;margin:2px 0 10px}
+    .row{display:grid;grid-template-columns:1fr 170px;gap:10px;align-items:center;margin:8px 0}
+    @media(max-width:560px){.row{grid-template-columns:1fr}}
+    label{font-size:14px;color:#d7e4ff}
+    input,select{width:100%;padding:10px 12px;border:1px solid #223258;background:#0b1734;color:#e8eeff;border-radius:10px;font-size:15px}
+    .hint{font-size:12px;color:var(--muted);margin-top:2px}
+    .btn{background:linear-gradient(135deg,#2563eb,#1d4ed8);border:0;color:white;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+    @media(max-width:900px){.kpis{grid-template-columns:1fr}}
+    .kpi{background:#0b1734;border:1px solid var(--line);border-radius:12px;padding:14px}
+    .kpi .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px}
+    .kpi .value{margin-top:4px;font-size:22px;font-weight:800}
+    .sub{font-size:12px;color:var(--muted)}
+    .ok{color:var(--ok)} .bad{color:var(--danger)} .warn{color:var(--warn)}
+    .stack{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:#0b1734;border:1px solid var(--line);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>SGIP Redline Profit Calculator (Installer)</h1>
+    <div class="grid">
+      <div class="card">
+        <div class="section-title">Inputs</div>
+
+        <div class="row">
+          <label>System Size (kW-DC)</label>
+          <input type="number" id="kw" value="8" min="0" step="0.1">
+        </div>
+        <div class="row">
+          <label>Redline ($/W)</label>
+          <input type="number" id="redlinePerW" value="2.50" min="0" step="0.01">
+        </div>
+        <div class="row">
+          <label>Sales Rep Commission ($/W)</label>
+          <input type="number" id="salesPerW" value="0.50" min="0" step="0.01">
+        </div>
+
+        <div class="row">
+          <label>Battery Count</label>
+          <input type="number" id="batts" value="3" min="0" step="1">
+        </div>
+        <div class="row">
+          <label>kWh per Battery</label>
+          <input type="number" id="kwhPerBatt" value="9.7" min="0" step="0.1">
+        </div>
+
+        <div class="row">
+          <label>SGIP Solar Rate ($/W)</label>
+          <input type="number" id="sgipSolarPerW" value="3.10" min="0" step="0.01">
+        </div>
+        <div class="row">
+          <label>SGIP Storage Rate ($/kWh)</label>
+          <input type="number" id="sgipStoragePerKWh" value="1100" min="0" step="1">
+        </div>
+
+        <div class="row">
+          <label>Manual SGIP Override ($) <span class="hint">(optional)</span></label>
+          <input type="number" id="manualSGIP" value="" min="0" step="100">
+        </div>
+
+        <div class="row">
+          <label>TEPC Override ($) <span class="hint">(optional)</span></label>
+          <input type="number" id="manualTEPC" value="" min="0" step="100">
+        </div>
+
+        <div class="row">
+          <label>ITC %</label>
+          <input type="number" id="itcPct" value="30" min="0" max="100" step="1">
+        </div>
+
+        <div class="row">
+          <label>PPA Enabled?</label>
+          <select id="ppaEnabled">
+            <option value="no" selected>No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>PPA Amount ($)</label>
+          <input type="number" id="ppaAmount" value="0" min="0" step="100">
+          <div class="hint">Auto = $5.50/W + $1,400 per battery (editable)</div>
+        </div>
+
+        <div class="stack">
+          <button class="btn" id="run">Run Calculator</button>
+          <span class="pill">Profit = (SGIP − Redline − Sales Commission) + ITC (from TEPC) + PPA kicker</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Financial Summary</div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">Redline Total</div>
+            <div class="value" id="kRedline">$0</div>
+            <div class="sub" id="kRedlineSub"></div>
+          </div>
+          <div class="kpi">
+            <div class="label">SGIP Approved</div>
+            <div class="value" id="kSGIP">$0</div>
+            <div class="sub" id="kSGIPSub"></div>
+          </div>
+          <div class="kpi">
+            <div class="label">Sales Commission</div>
+            <div class="value" id="kSales">$0</div>
+            <div class="sub" id="kSalesSub"></div>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">TEPC Used</div>
+            <div class="value" id="kTEPC">$0</div>
+            <div class="sub" id="kTEPCSub"></div>
+          </div>
+          <div class="kpi">
+            <div class="label">ITC Value</div>
+            <div class="value" id="kITC">$0</div>
+            <div class="sub" id="kITCSub"></div>
+          </div>
+          <div class="kpi">
+            <div class="label">PPA Kicker</div>
+            <div class="value" id="kPPA">$0</div>
+            <div class="sub" id="kPPASub"></div>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">Base Profit (no ITC/PPA)</div>
+            <div class="value" id="kBase">$0</div>
+            <div class="sub">= SGIP − Redline − Sales Comm</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Total Profit (incl. ITC &amp; PPA)</div>
+            <div class="value" id="kTotal">$0</div>
+            <div class="sub" id="kTotalSub"></div>
+          </div>
+          <div class="kpi">
+            <div class="label">Notes</div>
+            <div class="value" id="kNote" style="font-size:14px;font-weight:600">ITC from TEPC</div>
+            <div class="sub">PPA adds 20% of the 30% tax credit on PPA amount</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 <script>
   const $ = id => document.getElementById(id);
   const money = n => n.toLocaleString(undefined, {style:'currency', currency:'USD', maximumFractionDigits:0});
@@ -30,17 +200,16 @@
     const manualSGIP = parseFloat($('manualSGIP').value);
     const sgipApproved = isFinite(manualSGIP) && manualSGIP>0 ? manualSGIP : sgipCalc;
 
-    // ITC = % of SGIP Approved
-    const itcPct = (parseFloat($('itcPct').value)||0)/100;
-    const itcVal = itcPct * sgipApproved;
+    // --- TEPC fixed at SGIP + 30% ---
+    const tepc = sgipApproved * 1.30;
 
-    // TEPC = SGIP Approved + ITC
-    const tepc = sgipApproved + itcVal;
+    // ITC = 30% of TEPC (fixed, not using the input field anymore)
+    const itcVal = 0.30 * tepc;
 
-    // Base profit (no ITC/PPA)
+    // Base profit (no ITC / PPA)
     const baseProfit = sgipApproved - redlineTotal - salesComm;
 
-    // PPA logic: 20% of the total 30% tax credit ON THE PPA AMOUNT
+    // PPA logic: 20% of 30% tax credit on PPA amount
     const ppaEnabled = $('ppaEnabled').value === 'yes';
     const ppaAmount = parseFloat($('ppaAmount').value)||0;
     const ppaITC = 0.30 * ppaAmount;
@@ -65,7 +234,7 @@
     $('kBase').className = 'value ' + (baseProfit>=0?'ok':'bad');
 
     $('kITC').textContent = money(itcVal);
-    $('kITCSub').textContent = `${(itcPct*100).toFixed(0)}% × SGIP (${money(sgipApproved)})`;
+    $('kITCSub').textContent = `30% × TEPC (${money(tepc)})`;
 
     $('kPPA').textContent = money(ppaKicker);
     $('kPPASub').textContent = ppaEnabled ? `20% × (30% × ${money(ppaAmount)})` : 'disabled';
@@ -74,9 +243,15 @@
     $('kTotal').className = 'value ' + (totalProfit>=0?'ok':'bad');
     $('kTotalSub').textContent = `Base ${money(baseProfit)} + ITC ${money(itcVal)} + PPA ${money(ppaKicker)}`;
 
-    $('kNote').textContent = `TEPC = SGIP (${money(sgipApproved)}) + ITC (${money(itcVal)}) = ${money(tepc)}`;
+    $('kNote').textContent = `TEPC = SGIP (${money(sgipApproved)}) + 30% = ${money(tepc)}`;
   }
 
   $('run').addEventListener('click', calc);
   calc();
 </script>
+
+  // Initial run
+  calc();
+</script>
+</body>
+</html>
