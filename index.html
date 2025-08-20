@@ -3,368 +3,277 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MWB SGIP Dashboard</title>
+  <title>SGIP Redline Profit Calculator (Installer)</title>
   <style>
     :root{
-      --bg:#020817; --panel:#03102b; --card:#041939; --ink:#e1e8ff; --muted:#8aa0c9; --line:rgba(160,183,224,0.2);
-      --brand1:#3e5a9b; --brand2:#2b4d89; --amber:#f9a825; --green:#28a745; --sky:#4682b4; --violet:#5f4b8b; --pink:#be5090; --rose:#c94c4c; --cyan:#1e7f9c;
+      --bg:#0b1220; --panel:#0f1d39; --ink:#e8eeff; --muted:#9fb2d9; --line:#1e2b4d;
+      --brand:#3b82f6; --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(180deg,var(--bg),#0b132a);color:var(--ink);line-height:1.4;}
-    .bar{position:sticky;top:0;z-index:5;background:rgba(14,21,40,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-    .bar-inner{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:10px}
-    .title{font-weight:800;letter-spacing:.3px;font-size:20px}
-    .grow{flex:1}
-    .btn{background:linear-gradient(135deg,var(--brand1),var(--brand2));border:0;color:#032d2c;padding:10px 14px;border-radius:14px;font-weight:700;cursor:pointer;transition:transform .1s}
-    .btn:hover{transform:translateY(-1px)}
-    .btn.secondary{background:transparent;color:var(--ink);border:1px solid var(--line)}
-    .wrap{max-width:1200px;margin:20px auto;padding:0 14px}
-    .layout{display:grid;grid-template-columns:320px 1fr;gap:18px}
-    @media(max-width:960px){.layout{grid-template-columns:1fr}}
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
-    .h{font-size:13px;text-transform:uppercase;color:var(--muted);letter-spacing:1.4px;margin:6px 0 10px}
-    details{background:#0f1d39;border:1px solid var(--line);border-radius:12px;margin:10px 0;color:var(--ink)}
-    summary{list-style:none;padding:14px 16px;display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600}
-    summary::-webkit-details-marker{display:none}
-    .badge{padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--muted);font-size:11px;margin-left:auto}
-    .sec{padding:14px 16px;border-top:1px dashed var(--line)}
-    .row{display:grid;grid-template-columns:1fr 150px;gap:10px;align-items:center;margin:10px 0}
-    @media(max-width:540px){.row{grid-template-columns:1fr}}
-    label{font-size:14px;color:#d6dcec}
-    input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0a1734;color:var(--ink);font-size:15px}
-    .row.full{grid-template-columns:1fr!important}
-    .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
-    @media(max-width:1080px){.kpis{grid-template-columns:repeat(3,1fr)}}
-    @media(max-width:700px){.kpis{grid-template-columns:1fr}}
-    .kpi{background:#0f203e;border:1px solid var(--line);border-radius:14px;padding:14px}
-    .kpi .label{font-size:12px;color:var(--muted)}
-    .kpi .value{font-size:22px;font-weight:800;margin-top:6px}
-    .table{width:100%;border-collapse:collapse;margin-top:14px;overflow-x:auto;display:block}
-    .table th,.table td{border-bottom:1px dashed var(--line);padding:10px 8px;text-align:right;font-variant-numeric:tabular-nums;font-size:14px}
-    .table th:first-child,.table td:first-child{text-align:left}
-    .summary-tabs{display:flex;gap:8px;margin-top:16px}
-    .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#0f1d39;color:var(--ink);cursor:pointer;font-weight:700;font-size:14px;transition:background .1s,color .1s}
-    .tab.active{background:linear-gradient(135deg,var(--brand1),var(--brand2));color:#032d2c}
-    .project-address{font-size:14px;color:var(--muted);margin-bottom:10px;}
-    .summary-tabs .tab.active{border-color:transparent}
-    @media print{body{background:#fff;color:#000}.bar{display:none}.panel,.card{background:#fff;border:1px solid #ccc}input,select{background:#fff;border:1px solid #ccc;color:#000}}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#050914,#0f1830);color:var(--ink);}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    h1{font-size:22px;margin:0 0 12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .section-title{font-size:12px;letter-spacing:1.3px;color:var(--muted);text-transform:uppercase;margin:2px 0 10px}
+    .row{display:grid;grid-template-columns:1fr 170px;gap:10px;align-items:center;margin:8px 0}
+    @media(max-width:560px){.row{grid-template-columns:1fr}}
+    label{font-size:14px;color:#d7e4ff}
+    input,select{width:100%;padding:10px 12px;border:1px solid #223258;background:#0b1734;color:#e8eeff;border-radius:10px;font-size:15px}
+    .hint{font-size:12px;color:var(--muted);margin-top:2px}
+    .btn{background:linear-gradient(135deg,#2563eb,#1d4ed8);border:0;color:white;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+    @media(max-width:900px){.kpis{grid-template-columns:1fr}}
+    .kpi{background:#0b1734;border:1px solid var(--line);border-radius:12px;padding:14px}
+    .kpi .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px}
+    .kpi .value{margin-top:4px;font-size:22px;font-weight:800}
+    .sub{font-size:12px;color:var(--muted)}
+    .ok{color:var(--ok)} .bad{color:var(--danger)} .warn{color:var(--warn)}
+    .stack{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .pill{padding:6px 10px;border-radius:999px;background:#0b1734;border:1px solid var(--line);font-size:13px}
   </style>
 </head>
 <body>
-  <header class="bar">
-    <div class="bar-inner">
-      <div class="title">MWB SGIP Dashboard</div>
-      <div class="grow"></div>
-      <button class="btn secondary" id="btnPreset4">4kW+3</button>
-      <button class="btn secondary" id="btnPreset8">8kW+3</button>
-      <button class="btn secondary" id="btnPreset12">12kW+3</button>
-      <button class="btn" id="btnExport">Export PDF</button>
-    </div>
-  </header>
-
   <div class="wrap">
-    <div class="layout">
-      <aside class="panel" aria-label="Controls">
-        <div class="h">Controls</div>
-        <details open>
-          <summary>Project Info</summary>
-          <div class="sec">
-            <div class="row full"><label>Project Address</label><input id="projectAddress" type="text" placeholder="Enter address"></div>
+    <h1>SGIP Redline Profit Calculator (Installer)</h1>
+    <div class="grid">
+      <div class="card">
+        <div class="section-title">Inputs</div>
+
+        <div class="row">
+          <label>System Size (kW-DC)</label>
+          <input type="number" id="kw" value="8" min="0" step="0.1">
+        </div>
+        <div class="row">
+          <label>Redline ($/W)</label>
+          <input type="number" id="redlinePerW" value="2.50" min="0" step="0.01">
+        </div>
+        <div class="row">
+          <label>Sales Rep Commission ($/W)</label>
+          <input type="number" id="salesPerW" value="0.50" min="0" step="0.01">
+        </div>
+
+        <div class="row">
+          <label>Battery Count</label>
+          <input type="number" id="batts" value="3" min="0" step="1">
+        </div>
+        <div class="row">
+          <label>kWh per Battery</label>
+          <input type="number" id="kwhPerBatt" value="9.7" min="0" step="0.1">
+        </div>
+
+        <div class="row">
+          <label>SGIP Solar Rate ($/W)</label>
+          <input type="number" id="sgipSolarPerW" value="3.10" min="0" step="0.01">
+        </div>
+        <div class="row">
+          <label>SGIP Storage Rate ($/kWh)</label>
+          <input type="number" id="sgipStoragePerKWh" value="1100" min="0" step="1">
+        </div>
+
+        <div class="row">
+          <label>Manual SGIP Override ($) <span class="hint">(optional)</span></label>
+          <input type="number" id="manualSGIP" value="" min="0" step="100">
+        </div>
+
+        <div class="row">
+          <label>TEPC Override ($) <span class="hint">(optional)</span></label>
+          <input type="number" id="manualTEPC" value="" min="0" step="100">
+        </div>
+
+        <div class="row">
+          <label>ITC %</label>
+          <input type="number" id="itcPct" value="30" min="0" max="100" step="1">
+        </div>
+
+        <div class="row">
+          <label>PPA Enabled?</label>
+          <select id="ppaEnabled">
+            <option value="no" selected>No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>PPA Amount ($)</label>
+          <input type="number" id="ppaAmount" value="0" min="0" step="100">
+          <div class="hint">Auto = $5.50/W + $1,400 per battery (editable)</div>
+        </div>
+
+        <div class="stack">
+          <button class="btn" id="run">Run Calculator</button>
+          <span class="pill">Profit = (SGIP − Redline − Sales Commission) + ITC (from TEPC) + PPA kicker</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Financial Summary</div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">Redline Total</div>
+            <div class="value" id="kRedline">$0</div>
+            <div class="sub" id="kRedlineSub"></div>
           </div>
-        </details>
-
-        <details open>
-          <summary>Deal Basics <span class="badge">sizes</span></summary>
-          <div class="sec">
-            <div class="row"><label>Solar Size (kW)</label><input id="kw" type="number" min="0" step="0.1" value="8"></div>
-            <div class="row"><label>Battery Count</label><input id="batts" type="number" min="0" step="1" value="3"></div>
-            <div class="row"><label>kWh per Battery</label><input id="kwhPerBatt" type="number" min="0" step="0.1" value="9.7"></div>
+          <div class="kpi">
+            <div class="label">SGIP Approved</div>
+            <div class="value" id="kSGIP">$0</div>
+            <div class="sub" id="kSGIPSub"></div>
           </div>
-        </details>
-      </aside>
-
-      <main class="content" aria-label="Dashboard">
-        <div class="card">
-          <div class="h">Project Summary</div>
-          <div id="projectAddressDisplay" class="project-address"></div>
-
-          <div class="kpis">
-            <div class="kpi"><div class="label">SGIP (Solar)</div><div id="kSolar" class="value">$0</div></div>
-            <div class="kpi"><div class="label">SGIP (Storage)</div><div id="kStorage" class="value">$0</div></div>
-            <div class="kpi"><div class="label">SGIP Total</div><div id="kTotalSGIP" class="value">$0</div></div>
-            <div class="kpi"><div class="label">Max TEPC</div><div id="kMaxTEPC" class="value">$0</div></div>
-            <div class="kpi"><div class="label">ITC</div><div id="kITC" class="value">$0</div></div>
-            <div class="kpi"><div class="label">APP Upfront (50%)</div><div id="kAPP" class="value">$0</div></div>
-          </div>
-
-          <div class="summary-tabs">
-            <button class="tab active" data-tab="financial">Financial Summary</button>
-            <button class="tab" data-tab="timeline">Timeline</button>
-            <button class="tab" data-tab="incentives">Rates &amp; Incentives</button>
-            <button class="tab" data-tab="costs">Costs &amp; Commissions</button>
-          </div>
-
-          <!-- Financial summary (now SGIP-based) -->
-          <div id="financialView">
-            <table class="table">
-              <thead><tr><th>Line</th><th>Amount</th></tr></thead>
-              <tbody>
-                <tr><td><b>Funding Basis (SGIP $)</b></td><td id="tdFunding"><b>$0</b></td></tr>
-                <tr><td>Operations Costs ($/W)</td><td id="tdOps">$0</td></tr>
-                <tr><td>Sales Org Commission ($/W + $/battery)</td><td id="tdSales">$0</td></tr>
-                <tr><td>Equipment</td><td id="tdEquip">$0</td></tr>
-                <tr><td>EPC Labor</td><td id="tdEPC">$0</td></tr>
-                <tr><td>Permits / Interconnection</td><td id="tdPermits">$0</td></tr>
-                <tr><td>Overhead / Other</td><td id="tdOther">$0</td></tr>
-                <tr><td><b>Net Margin (Excl. ITC)</b></td><td id="tdNetEx"><b>$0</b></td></tr>
-                <tr><td><b>Net Margin (Incl. ITC)</b></td><td id="tdNetIn"><b>$0</b></td></tr>
-                <tr><td><b>Margin % (Excl. ITC)</b></td><td id="tdPctEx"><b>0%</b></td></tr>
-                <tr><td><b>Margin % (Incl. ITC)</b></td><td id="tdPctIn"><b>0%</b></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Timeline -->
-          <div id="timelineView" style="display:none">
-            <div class="h" style="margin-top:18px">SGIP Approval Timelines</div>
-            <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
-              <select id="utility">
-                <option value="pge">PG&amp;E</option>
-                <option value="sce">SCE</option>
-              </select>
-              <select id="speed">
-                <option value="fast">Fastest</option>
-                <option value="avg">Average</option>
-              </select>
-            </div>
-            <div class="segbar" id="segbar"></div>
-            <div class="legend" id="legend"></div>
-            <div class="tag" id="tlTotal" style="margin-top:8px"></div>
-            <div id="stageDesc" style="margin-top:10px;font-size:14px;color:var(--muted)"></div>
-          </div>
-
-          <!-- Incentives -->
-          <div id="incentivesView" style="display:none">
-            <div class="h" style="margin-top:18px">Rates &amp; Incentives</div>
-            <div class="row full"><label>SGIP Program</label>
-              <select id="sgipProgram">
-                <option value="res_equity">Res. Equity (Solar+Storage)</option>
-                <option value="nonres_equity">Non-Res Equity</option>
-                <option value="equity_res_res">Equity Resiliency (Res)</option>
-                <option value="equity_res_nonres">Equity Resiliency (Non-Res)</option>
-                <option value="sjv_res">SJV (Res)</option>
-                <option value="sjv_nonres">SJV (Non-Res)</option>
-                <option value="general">General Market</option>
-              </select>
-            </div>
-            <div class="program-display" id="programDisplay">
-              <div><span class="label">Solar Incentive:</span> <span id="displaySolarRate" class="value"></span></div>
-              <div><span class="label">Storage Incentive:</span> <span id="displayStorageRate" class="value"></span></div>
-              <div><span class="label">Storage Cap:</span> <span id="displayStorageCap" class="value"></span></div>
-            </div>
-            <input id="solarRate" type="hidden" value="3100">
-            <input id="storageRate" type="hidden" value="1100">
-            <input id="storageCap" type="hidden" value="33000">
-            <div class="row"><label>ITC %</label><input id="itcPct" type="number" min="0" max="100" step="1" value="30"></div>
-            <div class="row full"><label><input id="useAPP" type="checkbox" checked> Advanced Payment (APP 50%)</label></div>
-            <div class="row full"><a href="https://sgiphandbook.com/Application/#/step1" target="_blank" class="qualify-link">Qualify Customer</a></div>
-          </div>
-
-          <!-- Costs -->
-          <div id="costsView" style="display:none">
-            <div class="h" style="margin-top:18px">Costs &amp; Commissions</div>
-            <div class="row"><label>Equipment (solar+batt)</label><input id="costEquip" type="number" min="0" step="100" value="42000"></div>
-            <div class="row"><label>EPC Labor / Install</label><input id="costEPC" type="number" min="0" step="100" value="9000"></div>
-            <div class="row"><label>Permits / Interconnection</label><input id="costPermits" type="number" min="0" step="50" value="1000"></div>
-            <div class="row"><label>Overhead / Other</label><input id="costOther" type="number" min="0" step="50" value="2000"></div>
-            <div class="row"><label>Sales Org ($/W)</label><input id="salesPerW" type="number" min="0" step="0.05" value="0.5"></div>
-            <div class="row"><label>Sales Org ($/battery)</label><input id="salesPerBatt" type="number" min="0" step="50" value="1000"></div>
-            <div class="row"><label>Operations Costs ($/W)</label><input id="opsPerW" type="number" min="0" step="0.1" value="1"></div>
+          <div class="kpi">
+            <div class="label">Sales Commission</div>
+            <div class="value" id="kSales">$0</div>
+            <div class="sub" id="kSalesSub"></div>
           </div>
         </div>
-      </main>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">TEPC Used</div>
+            <div class="value" id="kTEPC">$0</div>
+            <div class="sub" id="kTEPCSub"></div>
+          </div>
+          <div class="kpi">
+            <div class="label">ITC Value</div>
+            <div class="value" id="kITC">$0</div>
+            <div class="sub" id="kITCSub"></div>
+          </div>
+          <div class="kpi">
+            <div class="label">PPA Kicker</div>
+            <div class="value" id="kPPA">$0</div>
+            <div class="sub" id="kPPASub"></div>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">Base Profit (no ITC/PPA)</div>
+            <div class="value" id="kBase">$0</div>
+            <div class="sub">= SGIP − Redline − Sales Comm</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Total Profit (incl. ITC &amp; PPA)</div>
+            <div class="value" id="kTotal">$0</div>
+            <div class="sub" id="kTotalSub"></div>
+          </div>
+          <div class="kpi">
+            <div class="label">Notes</div>
+            <div class="value" id="kNote" style="font-size:14px;font-weight:600">ITC from TEPC</div>
+            <div class="sub">PPA adds 20% of the 30% ITC on PPA amount</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <script>
-    const $=id=>document.getElementById(id);
-    const money=n=>n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+<script>
+  const $ = id => document.getElementById(id);
+  const money = n => n.toLocaleString(undefined, {style:'currency', currency:'USD', maximumFractionDigits:0});
 
-    $('btnPreset4').onclick=()=>preset(4);
-    $('btnPreset8').onclick=()=>preset(8);
-    $('btnPreset12').onclick=()=>preset(12);
-    $('btnExport').onclick=()=>window.print();
+  // Track if user manually edited PPA so we don't overwrite
+  let ppaManuallyEdited = false;
+  $('ppaAmount').addEventListener('input', () => { ppaManuallyEdited = true; });
 
-    const summaryTabs=document.querySelectorAll('.summary-tabs .tab');
-    summaryTabs.forEach(tab=>{
-      tab.addEventListener('click',()=>{
-        summaryTabs.forEach(t=>t.classList.remove('active'));
-        tab.classList.add('active');
-        const view=tab.dataset.tab;
-        $('financialView').style.display=view==='financial'?'block':'none';
-        $('timelineView').style.display=view==='timeline'?'block':'none';
-        $('incentivesView').style.display=view==='incentives'?'block':'none';
-        $('costsView').style.display=view==='costs'?'block':'none';
-      });
-    });
-
-    const timelineData={
-      pge:{fast:{RRF_Review:.7,RRF_Process:21.1,ICF_Review:1.43,ICF_Process:11.22,Inspection:1.86,PPM_Review:0.0,PPM_Process:5.5},
-           avg:{RRF_Review:2.1,RRF_Process:40.8,ICF_Review:2.55,ICF_Process:38.75,Inspection:17.47,PPM_Review:.62,PPM_Process:37.73}},
-      sce:{fast:{RRF_Review:.3,RRF_Process:2.6,ICF_Review:.13,ICF_Process:4.0,Inspection:18.71,PPM_Review:0.0,PPM_Process:7.67},
-           avg:{RRF_Review:.9,RRF_Process:15.7,ICF_Review:1.46,ICF_Process:11.22,Inspection:36.03,PPM_Review:.34,PPM_Process:15.23}}
-    };
-    const stageColors={RRF_Review:'#60a5fa',RRF_Process:'#34d399',ICF_Review:'#fbbf24',ICF_Process:'#f472b6',Inspection:'#a78bfa',PPM_Review:'#fb7185',PPM_Process:'#22d3ee'};
-    const stageText={
-      RRF_Review:'<b>RRF Review:</b> Admin screens Reservation Request for completeness/eligibility.',
-      RRF_Process:'<b>RRF Processing:</b> Reservation approval; if enrolled in APP, <b>50% of SGIP</b> is released now.',
-      ICF_Review:'<b>ICF Review:</b> Post-install docs checked (invoices, serials, photos).',
-      ICF_Process:'<b>ICF Processing:</b> Final approval of incentive claim & true-up.',
-      Inspection:'<b>Inspection:</b> Onsite/remote verification of installed system.',
-      PPM_Review:'<b>PPM Review:</b> (If applicable) performance/maintenance plan review.',
-      PPM_Process:'<b>PPM Processing:</b> Close-out; final payment issued.'
-    };
-
-    const programs={
-      res_equity:{name:'Residential Solar + Storage Equity', solarRate:3100, storageRate:1100, storageCap:33000},
-      nonres_equity:{name:'Non-Residential Storage Equity', storageRate:850, solarRate:0, storageCap:500000},
-      equity_res_res:{name:'Equity Resiliency (Residential)', solarRate:0, storageRate:1000, storageCap:500000},
-      equity_res_nonres:{name:'Equity Resiliency (Non-Residential)', solarRate:0, storageRate:1000, storageCap:500000},
-      sjv_res:{name:'San Joaquin Valley (Residential)', solarRate:0, storageRate:1100, storageCap:500000},
-      sjv_nonres:{name:'San Joaquin Valley (Non-Residential)', solarRate:0, storageRate:1000, storageCap:500000},
-      general:{name:'General Market', solarRate:3100, storageRate:1100, storageCap:33000}
-    };
-
-    const fields=['kw','batts','kwhPerBatt','sgipProgram','solarRate','storageRate','storageCap','itcPct','useAPP','costEquip','costEPC','costPermits','costOther','salesPerW','salesPerBatt','opsPerW','utility','speed','projectAddress'];
-    const els=Object.fromEntries(fields.map(id=>[id,$(id)]));
-
-    fields.forEach(id=>{
-      const el=els[id];
-      el.addEventListener('input',calc);
-      el.addEventListener('change',calc);
-    });
-
-    els.sgipProgram.addEventListener('change',()=>{
-      const p=programs[els.sgipProgram.value] || programs.general;
-      els.solarRate.value=p.solarRate;
-      els.storageRate.value=p.storageRate;
-      els.storageCap.value=p.storageCap;
-      updateProgramDisplay(p);
-      calc();
-    });
-
-    function updateProgramDisplay(p){
-      $('displaySolarRate').textContent=p.solarRate? `$${(p.solarRate/1000).toFixed(2)}/W` : 'n/a';
-      $('displayStorageRate').textContent=p.storageRate? `$${(p.storageRate/1000).toFixed(2)}/Wh` : 'n/a';
-      $('displayStorageCap').textContent=p.storageCap>=1e6? 'No cap' : money(p.storageCap);
+  function autoFillPPAIfNeeded(watts, batts){
+    if (!ppaManuallyEdited){
+      const autoPPA = (5.50 * watts) + (1400 * batts);
+      $('ppaAmount').value = isFinite(autoPPA) ? autoPPA.toFixed(0) : 0;
     }
+  }
 
-    function preset(kw){
-      els.kw.value=kw; els.batts.value=3; els.kwhPerBatt.value=9.7; calc();
-    }
+  function calc(){
+    const kw = parseFloat($('kw').value)||0;
+    const watts = kw * 1000;
 
-    function calc(){
-      const addr=els.projectAddress.value.trim();
-      $('projectAddressDisplay').textContent=addr ? 'Project Address: '+addr : '';
+    // Redline
+    const redlinePerW = parseFloat($('redlinePerW').value)||0;
+    const redlineTotal = redlinePerW * watts;
 
-      const kw=parseFloat(els.kw.value)||0;
-      const batts=parseInt(els.batts.value)||0;
-      const kwhPerBatt=parseFloat(els.kwhPerBatt.value)||0;
+    // Sales commission
+    const salesPerW = parseFloat($('salesPerW').value)||0;
+    const salesComm = salesPerW * watts;
 
-      const solarRate=parseFloat(els.solarRate.value)||0;
-      const storageRate=parseFloat(els.storageRate.value)||0;
-      const storageCap=parseFloat(els.storageCap.value)||0;
-      const itcPct=(parseFloat(els.itcPct.value)||0)/100;
+    // Storage
+    const batts = parseFloat($('batts').value)||0;
+    const kwhPerBatt = parseFloat($('kwhPerBatt').value)||0;
+    const storageKWh = batts * kwhPerBatt;
 
-      const watts=kw*1000;
-      const solarSGIP=kw*solarRate;                 // $ per W * kW
-      const storageKWh=batts*kwhPerBatt;            // total usable kWh
-      let storageSGIP=storageKWh*storageRate;       // $ per kWh * kWh
-      if(storageCap>0) storageSGIP=Math.min(storageSGIP,storageCap);
-      const totalSGIP=solarSGIP+storageSGIP;
+    // SGIP rates & amounts
+    const sgipSolarPerW = parseFloat($('sgipSolarPerW').value)||0;
+    const sgipStoragePerKWh = parseFloat($('sgipStoragePerKWh').value)||0;
+    const sgipSolar = sgipSolarPerW * watts;
+    const sgipStorage = sgipStoragePerKWh * storageKWh;
+    let sgipCalc = sgipSolar + sgipStorage;
 
-      // TEPC still calculated for reference KPI only
-      const maxTEPC=(1-itcPct)>0 ? (totalSGIP/(1-itcPct)) : totalSGIP;
-      const itcVal=maxTEPC*itcPct;
-      const appUpfront=els.useAPP.checked ? 0.5*totalSGIP : 0;
+    // Manual override for SGIP approved
+    const manualSGIP = parseFloat($('manualSGIP').value);
+    const sgipApproved = isFinite(manualSGIP) && manualSGIP>0 ? manualSGIP : sgipCalc;
 
-      // Costs & commissions
-      const costEquip=parseFloat(els.costEquip.value)||0;
-      const costEPC=parseFloat(els.costEPC.value)||0;
-      const costPermits=parseFloat(els.costPermits.value)||0;
-      const costOther=parseFloat(els.costOther.value)||0;
-      const hardCosts=costEquip+costEPC+costPermits+costOther;
+    // --- TEPC (auto = SGIP solar + storage; can override) ---
+    const manualTEPC = parseFloat($('manualTEPC').value);
+    const tepcUsed = isFinite(manualTEPC) && manualTEPC>0 ? manualTEPC : (sgipSolar + sgipStorage);
 
-      const salesPerW=parseFloat(els.salesPerW.value)||0;
-      const salesPerBatt=parseFloat(els.salesPerBatt.value)||0;
-      const opsPerW=parseFloat(els.opsPerW.value)||0;
+    // Base profit (no ITC / PPA)
+    const baseProfit = sgipApproved - redlineTotal - salesComm;
 
-      const salesComm=(salesPerW*watts)+(salesPerBatt*batts);
-      const opsCost=opsPerW*watts;
-      const totalCost=hardCosts+salesComm+opsCost;
+    // ITC from TEPC
+    const itcPct = (parseFloat($('itcPct').value)||0)/100;
+    const itcVal = itcPct * tepcUsed;
 
-      // >>> SGIP-based financials <<<
-      const topLineSGIP=totalSGIP;                  // Funding basis
-      const netEx=topLineSGIP-totalCost;            // Excluding ITC
-      const netIn=topLineSGIP+itcVal-totalCost;     // Including ITC
-      const pctEx=topLineSGIP>0 ? (netEx/topLineSGIP)*100 : 0;
-      const pctIn=(topLineSGIP+itcVal)>0 ? (netIn/(topLineSGIP+itcVal))*100 : 0;
+    // PPA logic: 20% of the total 30% tax credit ON THE PPA AMOUNT
+    const ppaEnabled = $('ppaEnabled').value === 'yes';
 
-      // KPIs
-      $('kSolar').textContent=money(solarSGIP);
-      $('kStorage').textContent=money(storageSGIP);
-      $('kTotalSGIP').textContent=money(totalSGIP);
-      $('kMaxTEPC').textContent=money(maxTEPC);
-      $('kITC').textContent=money(itcVal);
-      $('kAPP').textContent=money(appUpfront);
+    // Auto-fill PPA if not manually edited
+    autoFillPPAIfNeeded(watts, batts);
 
-      // Financial table (now SGIP-based)
-      $('tdFunding').textContent=money(topLineSGIP);
-      $('tdOps').textContent=money(opsCost);
-      $('tdSales').textContent=money(salesComm);
-      $('tdEquip').textContent=money(costEquip);
-      $('tdEPC').textContent=money(costEPC);
-      $('tdPermits').textContent=money(costPermits);
-      $('tdOther').textContent=money(costOther);
-      $('tdNetEx').textContent=money(netEx);
-      $('tdNetIn').textContent=money(netIn);
-      $('tdPctEx').textContent=pctEx.toFixed(1)+'%';
-      $('tdPctIn').textContent=pctIn.toFixed(1)+'%';
+    const ppaAmount = parseFloat($('ppaAmount').value)||0;
+    const ppaITC = 0.30 * ppaAmount;
+    const ppaKicker = ppaEnabled ? 0.20 * ppaITC : 0;
 
-      drawTimeline();
-    }
+    // Final total profit
+    const totalProfit = baseProfit + itcVal + ppaKicker;
 
-    function drawTimeline(){
-      const util=els.utility.value, speed=els.speed.value;
-      const data=timelineData[util][speed];
-      const steps=[['RRF Review','RRF_Review'],['RRF Process','RRF_Process'],['ICF Review','ICF_Review'],['ICF Process','ICF_Process'],['Inspection','Inspection'],['PPM Review','PPM_Review'],['PPM Process','PPM_Process']];
-      const total=Object.values(data).reduce((a,b)=>a+b,0);
-      const segbar=$('segbar'); segbar.innerHTML='';
-      steps.forEach(([label,key])=>{
-        const d=data[key];
-        const seg=document.createElement('div');
-        seg.className='seg'; seg.style.width=(d/total*100).toFixed(2)+'%'; seg.style.background=stageColors[key];
-        seg.title=`${label}: ${d.toFixed(1)} days`;
-        segbar.appendChild(seg);
-      });
-      $('legend').innerHTML=steps.map(([label,key])=>`<span class="tag" style="border-color:${stageColors[key]}">${label}: <b>${data[key].toFixed(1)}</b>d</span>`).join('');
-      $('tlTotal').textContent=`${util.toUpperCase()} — ${speed==='fast'?'Fastest':'Average'} total: ${total.toFixed(1)} days`;
-      $('stageDesc').innerHTML=steps.map(([label,key])=>`<div style="border-left:3px solid ${stageColors[key]};padding-left:8px;margin:4px 0">${stageText[key]}</div>`).join('');
-    }
+    // Outputs
+    $('kRedline').textContent = money(redlineTotal);
+    $('kRedlineSub').textContent = `${kw.toFixed(1)} kW × $${redlinePerW.toFixed(2)}/W`;
 
-    $('utility').addEventListener('change',drawTimeline);
-    $('speed').addEventListener('change',drawTimeline);
+    $('kSGIP').textContent = money(sgipApproved);
+    $('kSGIPSub').textContent = (isFinite(manualSGIP) && manualSGIP>0)
+      ? 'manual override applied'
+      : `Solar: ${money(sgipSolar)} + Storage: ${money(sgipStorage)}`;
 
-    function init(){
-      const p=programs[els.sgipProgram.value] || programs.general;
-      $('displaySolarRate').textContent=p.solarRate? `$${(p.solarRate/1000).toFixed(2)}/W` : 'n/a';
-      $('displayStorageRate').textContent=p.storageRate? `$${(p.storageRate/1000).toFixed(2)}/Wh` : 'n/a';
-      $('displayStorageCap').textContent=p.storageCap>=1e6? 'No cap' : money(p.storageCap);
-      preset(8);
-    }
-    init();
-  </script>
+    $('kSales').textContent = money(salesComm);
+    $('kSalesSub').textContent = `${kw.toFixed(1)} kW × $${salesPerW.toFixed(2)}/W`;
+
+    $('kTEPC').textContent = money(tepcUsed);
+    $('kTEPCSub').textContent = (isFinite(manualTEPC) && manualTEPC>0)
+      ? 'manual TEPC override'
+      : 'auto = SGIP Solar + Storage';
+
+    $('kBase').textContent = money(baseProfit);
+    $('kBase').className = 'value ' + (baseProfit>=0?'ok':'bad');
+
+    $('kITC').textContent = money(itcVal);
+    $('kITCSub').textContent = `${(itcPct*100).toFixed(0)}% × TEPC (${money(tepcUsed)})`;
+
+    $('kPPA').textContent = money(ppaKicker);
+    $('kPPASub').textContent = ppaEnabled ? `20% × (30% × ${money(ppaAmount)})` : 'disabled';
+
+    $('kTotal').textContent = money(totalProfit);
+    $('kTotal').className = 'value ' + (totalProfit>=0?'ok':'bad');
+    $('kTotalSub').textContent = `Base ${money(baseProfit)} + ITC ${money(itcVal)} + PPA ${money(ppaKicker)}`;
+  }
+
+  // Recalc & auto-fill on demand
+  $('run').addEventListener('click', calc);
+  // Keep PPA auto-fill responsive when core drivers change (unless user edited)
+  ['kw','redlinePerW','salesPerW','batts','kwhPerBatt','sgipSolarPerW','sgipStoragePerKWh','manualSGIP','manualTEPC','itcPct','ppaEnabled']
+    .forEach(id => $(id).addEventListener('input', () => { calc(); }));
+
+  // Initial
+  calc();
+</script>
 </body>
 </html>
