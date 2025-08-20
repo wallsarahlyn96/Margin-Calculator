@@ -94,7 +94,7 @@
 
         <div class="stack">
           <button class="btn" id="run">Run Calculator</button>
-          <span class="pill">Base+ITC = (SGIP − Redline − Sales) + 30% of TEPC • Total Profit (PPA only) = Base (no ITC) + min 15% of PPA</span>
+          <span class="pill">PPA Profit = Base (SGIP − Redline − Sales) + 20% of PPA • Total Profit = PPA Profit + ITC (30% of TEPC)</span>
         </div>
       </div>
 
@@ -131,7 +131,7 @@
             <div class="sub" id="kITCSub"></div>
           </div>
           <div class="kpi">
-            <div class="label">PPA Kicker</div>
+            <div class="label">PPA Kickback</div>
             <div class="value" id="kPPA">$0</div>
             <div class="sub" id="kPPASub"></div>
           </div>
@@ -139,12 +139,12 @@
 
         <div class="kpis">
           <div class="kpi">
-            <div class="label">Base Profit + ITC</div>
+            <div class="label">PPA Profit (No ITC, Yes PPA Kickback)</div>
             <div class="value" id="kBase">$0</div>
             <div class="sub" id="kBaseSub"></div>
           </div>
           <div class="kpi">
-            <div class="label">Total Profit (PPA only — min 15% of PPA)</div>
+            <div class="label">Total Profit (Includes ITC & PPA Kickback)</div>
             <div class="value" id="kTotal">$0</div>
             <div class="sub" id="kTotalSub"></div>
           </div>
@@ -203,18 +203,20 @@
     // ITC = 30% of TEPC
     const itcVal = 0.30 * tepcUsed;
 
-    // Base (no ITC) & Base + ITC
+    // Base (no ITC)
     const baseNoITC = sgipApproved - redlineTotal - salesComm;
-    const basePlusITC = baseNoITC + itcVal;
 
-    // PPA kicker = MIN 15% of PPA amount
+    // PPA kickback = 20% of total PPA price to installer
     const ppaEnabled = $('ppaEnabled').value === 'yes';
     const ppaAmount = parseFloat($('ppaAmount').value)||0;
-    const ppaKickerRate = 0.15; // minimum 15%
+    const ppaKickerRate = 0.20; // 20% of PPA amount
     const ppaKicker = ppaEnabled ? ppaKickerRate * ppaAmount : 0;
 
-    // Total Profit (PPA only, no ITC added here)
-    const totalProfit = baseNoITC + ppaKicker;
+    // KPI: PPA Profit (no ITC, includes PPA)
+    const ppaProfit = baseNoITC + ppaKicker;
+
+    // KPI: Total Profit (includes ITC & PPA)
+    const totalProfit = ppaProfit + itcVal;
 
     // --- Outputs ---
     $('kRedline').textContent = money(redlineTotal);
@@ -233,14 +235,15 @@
     $('kITCSub').textContent = `30% × TEPC (${money(tepcUsed)})`;
 
     $('kPPA').textContent = money(ppaKicker);
-    $('kPPASub').textContent = ppaEnabled ? `${(ppaKickerRate*100).toFixed(0)}% of PPA amount (minimum)` : 'disabled';
+    $('kPPASub').textContent = ppaEnabled ? `${(ppaKickerRate*100).toFixed(0)}% of PPA amount` : 'disabled';
 
-    $('kBase').textContent = money(basePlusITC);
-    $('kBaseSub').textContent = `= (SGIP ${money(sgipApproved)} − Redline ${money(redlineTotal)} − Sales ${money(salesComm)}) + ITC ${money(itcVal)}`;
+    $('kBase').textContent = money(ppaProfit);
+    $('kBase').className = 'value ' + (ppaProfit>=0?'ok':'bad');
+    $('kBaseSub').textContent = `Base (no ITC) ${money(baseNoITC)} + PPA ${money(ppaKicker)} (20% of PPA)`;
 
     $('kTotal').textContent = money(totalProfit);
     $('kTotal').className = 'value ' + (totalProfit>=0?'ok':'bad');
-    $('kTotalSub').textContent = `Base (no ITC) ${money(baseNoITC)} + PPA ${money(ppaKicker)} (min ${(ppaKickerRate*100).toFixed(0)}% of PPA)`;
+    $('kTotalSub').textContent = `PPA Profit ${money(ppaProfit)} + ITC ${money(itcVal)} (30% of TEPC)`;
   }
 
   // Recalc on click & when inputs change
