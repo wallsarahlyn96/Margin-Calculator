@@ -17,7 +17,7 @@
     @media(max-width:900px){.grid{grid-template-columns:1fr}}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
     .section-title{font-size:12px;letter-spacing:1.3px;color:var(--muted);text-transform:uppercase;margin:2px 0 10px}
-    .row{display:grid;grid-template-columns:1fr 170px;gap:10px;align-items:center;margin:8px 0}
+    .row{display:grid;grid-template-columns:1fr 200px;gap:10px;align-items:center;margin:8px 0}
     @media(max-width:560px){.row{grid-template-columns:1fr}}
     label{font-size:14px;color:#d7e4ff}
     input,select{width:100%;padding:10px 12px;border:1px solid #223258;background:#0b1734;color:#e8eeff;border-radius:10px;font-size:15px}
@@ -73,19 +73,11 @@
           <input type="number" id="sgipStoragePerKWh" value="1100" min="0" step="1">
         </div>
 
+        <!-- NEW: TEPC input (auto but editable) -->
         <div class="row">
-          <label>Manual SGIP Override ($) <span class="hint">(optional)</span></label>
-          <input type="number" id="manualSGIP" value="" min="0" step="100">
-        </div>
-
-        <div class="row">
-          <label>TEPC Override ($) <span class="hint">(optional)</span></label>
-          <input type="number" id="manualTEPC" value="" min="0" step="100">
-        </div>
-
-        <div class="row">
-          <label>ITC %</label>
-          <input type="number" id="itcPct" value="30" min="0" max="100" step="1">
+          <label>TEPC Amount ($)</label>
+          <input type="number" id="tepcAmount" value="0" min="0" step="100">
+          <div class="hint">Auto = $5.50/W + $1,400 per battery (editable)</div>
         </div>
 
         <div class="row">
@@ -103,7 +95,7 @@
 
         <div class="stack">
           <button class="btn" id="run">Run Calculator</button>
-          <span class="pill">Profit = (SGIP − Redline − Sales Commission) + ITC (from TEPC) + PPA kicker</span>
+          <span class="pill">Profit = (SGIP − Redline − Sales Commission) + 30% of TEPC + PPA kicker</span>
         </div>
       </div>
 
@@ -135,7 +127,7 @@
             <div class="sub" id="kTEPCSub"></div>
           </div>
           <div class="kpi">
-            <div class="label">ITC Value</div>
+            <div class="label">ITC Value (30%)</div>
             <div class="value" id="kITC">$0</div>
             <div class="sub" id="kITCSub"></div>
           </div>
@@ -159,8 +151,8 @@
           </div>
           <div class="kpi">
             <div class="label">Notes</div>
-            <div class="value" id="kNote" style="font-size:14px;font-weight:600">ITC from TEPC</div>
-            <div class="sub">PPA adds 20% of the 30% tax credit on PPA amount</div>
+            <div class="value" id="kNote" style="font-size:14px;font-weight:600">TEPC auto-filled</div>
+            <div class="sub">TEPC = $5.50/W + $1,400/batt (editable)</div>
           </div>
         </div>
       </div>
@@ -172,85 +164,100 @@
   const $ = id => document.getElementById(id);
   const money = n => n.toLocaleString(undefined, {style:'currency', currency:'USD', maximumFractionDigits:0});
 
+  // Respect manual edits so we don't overwrite TEPC/PPA after user types
+  let tepcEdited = false;
+  let ppaEdited = false;
+  $('tepcAmount').addEventListener('input', () => { tepcEdited = true; });
+  $('ppaAmount').addEventListener('input', () => { ppaEdited = true; });
+
+  function autoFillTEPCIfNeeded(watts, batts){
+    if (!tepcEdited){
+      const auto = (5.50 * watts) + (1400 * batts);
+      $('tepcAmount').value = isFinite(auto) ? Math.round(auto) : 0;
+    }
+  }
+  function autoFillPPAIfNeeded(watts, batts){
+    if (!ppaEdited){
+      const auto = (5.50 * watts) + (1400 * batts);
+      $('ppaAmount').value = isFinite(auto) ? Math.round(auto) : 0;
+    }
+  }
+
   function calc(){
     const kw = parseFloat($('kw').value)||0;
     const watts = kw * 1000;
 
-    // Redline
+    // Redline & Sales
     const redlinePerW = parseFloat($('redlinePerW').value)||0;
     const redlineTotal = redlinePerW * watts;
 
-    // Sales commission
     const salesPerW = parseFloat($('salesPerW').value)||0;
     const salesComm = salesPerW * watts;
 
-    // Storage
+    // Storage & SGIP calc
     const batts = parseFloat($('batts').value)||0;
     const kwhPerBatt = parseFloat($('kwhPerBatt').value)||0;
     const storageKWh = batts * kwhPerBatt;
 
-    // SGIP rates
     const sgipSolarPerW = parseFloat($('sgipSolarPerW').value)||0;
     const sgipStoragePerKWh = parseFloat($('sgipStoragePerKWh').value)||0;
     const sgipSolar = sgipSolarPerW * watts;
     const sgipStorage = sgipStoragePerKWh * storageKWh;
-    let sgipCalc = sgipSolar + sgipStorage;
+    const sgipApproved = sgipSolar + sgipStorage;
 
-    // Manual override for SGIP approved
-    const manualSGIP = parseFloat($('manualSGIP').value);
-    const sgipApproved = isFinite(manualSGIP) && manualSGIP>0 ? manualSGIP : sgipCalc;
+    // Auto-fill TEPC and PPA if not edited
+    autoFillTEPCIfNeeded(watts, batts);
+    autoFillPPAIfNeeded(watts, batts);
 
-    // --- TEPC fixed at SGIP + 30% ---
-    const tepc = sgipApproved * 1.30;
+    // TEPC (editable field)
+    const tepcUsed = parseFloat($('tepcAmount').value)||0;
 
-    // ITC = 30% of TEPC (fixed, not using the input field anymore)
-    const itcVal = 0.30 * tepc;
+    // ITC = 30% of TEPC
+    const itcVal = 0.30 * tepcUsed;
 
-    // Base profit (no ITC / PPA)
-    const baseProfit = sgipApproved - redlineTotal - salesComm;
-
-    // PPA logic: 20% of 30% tax credit on PPA amount
+    // PPA kicker = 20% of 30% ITC on PPA amount
     const ppaEnabled = $('ppaEnabled').value === 'yes';
     const ppaAmount = parseFloat($('ppaAmount').value)||0;
     const ppaITC = 0.30 * ppaAmount;
     const ppaKicker = ppaEnabled ? 0.20 * ppaITC : 0;
 
-    // Final total profit
+    // Base & Total Profit
+    const baseProfit = sgipApproved - redlineTotal - salesComm;
     const totalProfit = baseProfit + itcVal + ppaKicker;
 
-    // Outputs
+    // --- Outputs ---
     $('kRedline').textContent = money(redlineTotal);
     $('kRedlineSub').textContent = `${kw.toFixed(1)} kW × $${redlinePerW.toFixed(2)}/W`;
 
     $('kSGIP').textContent = money(sgipApproved);
-    $('kSGIPSub').textContent = (isFinite(manualSGIP) && manualSGIP>0)
-      ? 'manual override applied'
-      : `Solar: ${money(sgipSolar)} + Storage: ${money(sgipStorage)}`;
+    $('kSGIPSub').textContent = `Solar: ${money(sgipSolar)} + Storage: ${money(sgipStorage)}`;
 
     $('kSales').textContent = money(salesComm);
     $('kSalesSub').textContent = `${kw.toFixed(1)} kW × $${salesPerW.toFixed(2)}/W`;
 
-    $('kBase').textContent = money(baseProfit);
-    $('kBase').className = 'value ' + (baseProfit>=0?'ok':'bad');
+    $('kTEPC').textContent = money(tepcUsed);
+    $('kTEPCSub').textContent = tepcEdited ? 'manual edit applied' : 'auto = $5.50/W + $1,400/batt';
 
     $('kITC').textContent = money(itcVal);
-    $('kITCSub').textContent = `30% × TEPC (${money(tepc)})`;
+    $('kITCSub').textContent = `30% × TEPC (${money(tepcUsed)})`;
 
     $('kPPA').textContent = money(ppaKicker);
     $('kPPASub').textContent = ppaEnabled ? `20% × (30% × ${money(ppaAmount)})` : 'disabled';
 
+    $('kBase').textContent = money(baseProfit);
+    $('kBase').className = 'value ' + (baseProfit>=0?'ok':'bad');
+
     $('kTotal').textContent = money(totalProfit);
     $('kTotal').className = 'value ' + (totalProfit>=0?'ok':'bad');
     $('kTotalSub').textContent = `Base ${money(baseProfit)} + ITC ${money(itcVal)} + PPA ${money(ppaKicker)}`;
-
-    $('kNote').textContent = `TEPC = SGIP (${money(sgipApproved)}) + 30% = ${money(tepc)}`;
   }
 
+  // Recalc on click & on relevant input changes
   $('run').addEventListener('click', calc);
-  calc();
-</script>
+  ['kw','redlinePerW','salesPerW','batts','kwhPerBatt','sgipSolarPerW','sgipStoragePerKWh','ppaEnabled']
+    .forEach(id => $(id).addEventListener('input', calc));
 
-  // Initial run
+  // Initial
   calc();
 </script>
 </body>
