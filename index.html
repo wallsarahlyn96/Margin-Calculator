@@ -96,7 +96,7 @@
             <input type="number" id="ppaAmount" value="0" min="0" step="100">
             <button id="ppaAutoBtn" class="btn-ghost">Auto‑fill</button>
           </div>
-          <div class="hint">Auto‑fill sets to $5.50/W + $1,400 per battery (still editable)</div>
+          <div class="hint">Sets to $5.50/W + $1,400 per battery (still editable)</div>
         </div>
 
         <div class="stack">
@@ -162,7 +162,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -170,11 +169,11 @@
   const $ = id => document.getElementById(id);
   const money = n => n.toLocaleString(undefined, {style:'currency', currency:'USD', maximumFractionDigits:0});
 
-  // track if user manually edited TEPC so auto-fill won't overwrite
+  // track if user manually edited TEPC so auto-fill won't overwrite it
   let tepcEdited = false;
   $('tepcAmount').addEventListener('input', () => { tepcEdited = true; });
 
-  // Auto-fill helpers
+  // Shared formula for TEPC/PPA auto values
   const autoFormula = (watts, batts) => (5.50 * watts) + (1400 * batts);
 
   function autoFillTEPCIfNeeded(watts, batts){
@@ -184,13 +183,16 @@
     }
   }
 
-  // PPA auto-fill button
-  document.getElementById('ppaAutoBtn').addEventListener('click', () => {
-    const kw = parseFloat($('kw').value)||0;
-    const watts = kw * 1000;
-    const batts = parseFloat($('batts').value)||0;
-    const auto = autoFormula(watts, batts);
-    $('ppaAmount').value = isFinite(auto) ? Math.round(auto) : 0;
+  // PPA Auto-fill button
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('ppaAutoBtn').addEventListener('click', () => {
+      const kw = parseFloat($('kw').value)||0;
+      const watts = kw * 1000;
+      const batts = parseFloat($('batts').value)||0;
+      const auto = autoFormula(watts, batts);
+      $('ppaAmount').value = isFinite(auto) ? Math.round(auto) : 0;
+      calc();
+    });
   });
 
   function calc(){
@@ -204,7 +206,7 @@
     const salesPerW = parseFloat($('salesPerW').value)||0;
     const salesComm = salesPerW * watts;
 
-    // Storage & SGIP calc
+    // Storage & SGIP
     const batts = parseFloat($('batts').value)||0;
     const kwhPerBatt = parseFloat($('kwhPerBatt').value)||0;
     const storageKWh = batts * kwhPerBatt;
@@ -222,11 +224,10 @@
     // ITC = 30% of TEPC
     const itcVal = 0.30 * tepcUsed;
 
-    // PPA kicker = 20% of 30% ITC on PPA amount
+    // PPA kicker = 20% of 30% on PPA amount (i.e., 6% of PPA amount)
     const ppaEnabled = $('ppaEnabled').value === 'yes';
     const ppaAmount = parseFloat($('ppaAmount').value)||0;
-    const ppaITC = 0.30 * ppaAmount;
-    const ppaKicker = ppaEnabled ? 0.20 * ppaITC : 0;
+    const ppaKicker = ppaEnabled ? 0.06 * ppaAmount : 0;
 
     // Base & Total Profit
     const baseProfit = sgipApproved - redlineTotal - salesComm;
@@ -242,7 +243,6 @@
     $('kSales').textContent = money(salesComm);
     $('kSalesSub').textContent = `${kw.toFixed(1)} kW × $${salesPerW.toFixed(2)}/W`;
 
-    // TEPC KPI (this was the piece not populating before)
     $('kTEPC').textContent = money(tepcUsed);
     $('kTEPCSub').textContent = tepcEdited ? 'manual edit applied' : 'auto = $5.50/W + $1,400/batt';
 
@@ -250,7 +250,7 @@
     $('kITCSub').textContent = `30% × TEPC (${money(tepcUsed)})`;
 
     $('kPPA').textContent = money(ppaKicker);
-    $('kPPASub').textContent = ppaEnabled ? `20% × (30% × ${money(ppaAmount)})` : 'disabled';
+    $('kPPASub').textContent = ppaEnabled ? '6% of PPA amount' : 'disabled';
 
     $('kBase').textContent = money(baseProfit);
     $('kBase').className = 'value ' + (baseProfit>=0?'ok':'bad');
@@ -265,7 +265,7 @@
   ['kw','redlinePerW','salesPerW','batts','kwhPerBatt','sgipSolarPerW','sgipStoragePerKWh','ppaEnabled','tepcAmount','ppaAmount']
     .forEach(id => $(id).addEventListener('input', calc));
 
-  // Initial
+  // Initial run
   calc();
 </script>
 </body>
